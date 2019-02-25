@@ -20,7 +20,7 @@ public class SimpleTest {
         for (Assignment a : mv.getAssignments().values()) {
             if (a.isGlobal()) continue;
 
-            System.out.println(a.id + " := " + a.expr);
+            System.out.println(a.id + " := " + a.sExpr);
             for (Node child : a.deps) {
                 if (mv.getAssignments().get(child).isGlobal()) continue;
 

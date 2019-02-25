@@ -6,19 +6,19 @@ import java.util.ArrayList;
 
 public final class Assignment {
     public final String id;
-    public final String expr;
+    public final String sExpr;
     public ArrayList<Node> deps;
 
     /**
      * Constructs a new assignment with the given parameters.
      * @param id the identifier of this assignment
-     * @param expr the s-expression of this assignment, empty String if it already exists in Colocolo
-     * @param deps the dependences of this assignment, i.e. other nodes that appear in expr
+     * @param sExpr the s-expression of this assignment, empty String if it already exists in Colocolo
+     * @param deps the dependences of this assignment, i.e. other nodes that appear in sExpr
      * @implNote deps will be modified
      */
-    public Assignment(String id, String expr, ArrayList<Node> deps) {
+    public Assignment(String id, String sExpr, ArrayList<Node> deps) {
         this.id = id;
-        this.expr = expr;
+        this.sExpr = sExpr;
         this.deps = deps;
     }
 
@@ -27,6 +27,6 @@ public final class Assignment {
     }
 
     public boolean isGlobal() {
-        return expr.isEmpty();
+        return sExpr.isEmpty();
     }
 }
