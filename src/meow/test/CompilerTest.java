@@ -15,9 +15,12 @@ public class CompilerTest {
         Expression myset = fo.comprehension(somexrel);
 
         Compiler comp = new Compiler();
-        comp.compileGraph(myset);
 
-        System.out.println("compiled:");
+        long time = System.currentTimeMillis();
+        comp.compileGraph(myset);
+        time = System.currentTimeMillis() - time;
+
+        System.out.println("took " + time + "ms:");
         System.out.println(comp.toString());
     }
 }

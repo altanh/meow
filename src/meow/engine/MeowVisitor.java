@@ -1,12 +1,10 @@
 package meow.engine;
 
 import kodkod.ast.*;
-import kodkod.ast.operator.Multiplicity;
 import kodkod.ast.visitor.ReturnVisitor;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class MeowVisitor implements ReturnVisitor<String, String, String, String> {
     private final HashMap<Node, Assignment> assignments;
@@ -17,9 +15,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
         this.factory = new NameFactory();
 
         // Colocolo globals
-        assignments.put(Expression.UNIV, new Assignment("univ", "", new ArrayList<>()));
-        assignments.put(Expression.IDEN, new Assignment("iden", "", new ArrayList<>()));
-        assignments.put(Expression.NONE, new Assignment("none", "", new ArrayList<>()));
+        assignments.putAll(Assignment.GLOBALS);
     }
 
     public HashMap<Node, Assignment> getAssignments() {
@@ -34,7 +30,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
      */
     public String visit(Decls decls) {
         if (!assignments.containsKey(decls)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
 
             String sExpr = "(list";
             for (Decl d : decls) {
@@ -58,7 +54,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
      */
     public String visit(Decl decl) {
         if (!assignments.containsKey(decl)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(decl.variable());
             deps.add(decl.expression());
 
@@ -77,9 +73,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
     public String visit(Relation relation) {
         if (!assignments.containsKey(relation)) {
             String id = factory.withPrefix("rel$");
-            String sExpr = "(declare-relation " + relation.arity() + " \"" + id + "\")";
+            String sExpr = "(declare-relation " + relation.arity() + " \"" + relation.name() + "\")";
 
-            assignments.put(relation, new Assignment(id, sExpr, new ArrayList<>()));
+            assignments.put(relation, new Assignment(id, sExpr, new HashSet<>()));
         }
 
         return assignments.get(relation).id;
@@ -89,9 +85,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
         if (!assignments.containsKey(variable)) {
             // Ocelot seems to only ever declare 'variables' of arity 1...
             String id = factory.withPrefix("var$");
-            String sExpr = "(declare-relation " + variable.arity() + " \"" + id + "\")";
+            String sExpr = "(declare-relation " + variable.arity() + " \"" + variable.name() + "\")";
 
-            assignments.put(variable, new Assignment(id, sExpr, new ArrayList<>()));
+            assignments.put(variable, new Assignment(id, sExpr, new HashSet<>()));
         }
 
         return assignments.get(variable).id;
@@ -111,9 +107,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             String childExpr = unaryExpr.expression().accept(this);
             String op = unaryExpr.op().toString();
             String sExpr = "(" + op + " " + childExpr + ")";
-            String id = factory.withPrefix("u-sExpr$");
+            String id = factory.withPrefix("u-ex$");
 
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(unaryExpr.expression());
 
             assignments.put(unaryExpr, new Assignment(id, sExpr, deps));
@@ -128,9 +124,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             String rightExpr = binExpr.right().accept(this);
             String op = binExpr.op().toString();
             String sExpr = "(" + op + " " + leftExpr + " " + rightExpr + ")";
-            String id = factory.withPrefix("b-sExpr$");
+            String id = factory.withPrefix("b-ex$");
 
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(binExpr.left());
             deps.add(binExpr.right());
 
@@ -142,7 +138,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(NaryExpression expr) {
         if (!assignments.containsKey(expr)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
 
             String sExpr = "(" + expr.op().toString();
             for (Expression child : expr) {
@@ -151,7 +147,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             }
             sExpr += ")";
 
-            String id = factory.withPrefix("n-sExpr$");
+            String id = factory.withPrefix("n-ex$");
             assignments.put(expr, new Assignment(id, sExpr, deps));
         }
 
@@ -160,7 +156,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(Comprehension comprehension) {
         if (!assignments.containsKey(comprehension)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(comprehension.decls());
             deps.add(comprehension.formula());
 
@@ -221,14 +217,14 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(QuantifiedFormula quantFormula) {
         if (!assignments.containsKey(quantFormula)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(quantFormula.decls());
             deps.add(quantFormula.formula());
 
             String sExpr = "(quantified-formula \'" + quantFormula.quantifier().toString() + " "
                          + quantFormula.decls().accept(this) + " "
                          + quantFormula.formula().accept(this) + ")";
-            String id = factory.withPrefix("q-form$");
+            String id = factory.withPrefix("q-f$");
             assignments.put(quantFormula, new Assignment(id, sExpr, deps));
         }
 
@@ -237,7 +233,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(NaryFormula formula) {
         if (!assignments.containsKey(formula)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
 
             String sExpr = "(" + formula.op().toString();
             for (Formula child : formula) {
@@ -246,7 +242,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             }
             sExpr += ")";
 
-            String id = factory.withPrefix("n-form$");
+            String id = factory.withPrefix("n-f$");
             assignments.put(formula, new Assignment(id, sExpr, deps));
         }
 
@@ -255,7 +251,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(BinaryFormula formula) {
         if (!assignments.containsKey(formula)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(formula.left());
             deps.add(formula.right());
 
@@ -263,7 +259,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
                          + formula.left().accept(this) + " "
                          + formula.right().accept(this) + ")";
 
-            String id = factory.withPrefix("b-form$");
+            String id = factory.withPrefix("b-f$");
             assignments.put(formula, new Assignment(id, sExpr, deps));
         }
 
@@ -272,11 +268,11 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(NotFormula formula) {
         if (!assignments.containsKey(formula)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(formula.formula());
 
             String sExpr = "(! " + formula.formula().accept(this) + ")";
-            String id = factory.withPrefix("!-form$");
+            String id = factory.withPrefix("!-f$");
             assignments.put(formula, new Assignment(id, sExpr, deps));
         }
 
@@ -290,14 +286,14 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(ComparisonFormula compFormula) {
         if (!assignments.containsKey(compFormula)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(compFormula.left());
             deps.add(compFormula.right());
 
             String sExpr = "(" + compFormula.op().toString() + " "
                          + compFormula.left().accept(this) + " "
                          + compFormula.right().accept(this) + ")";
-            String id = factory.withPrefix("cmp-form$");
+            String id = factory.withPrefix("cmp-f$");
             assignments.put(compFormula, new Assignment(id, sExpr, deps));
         }
 
@@ -306,12 +302,12 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(MultiplicityFormula multFormula) {
         if (!assignments.containsKey(multFormula)) {
-            ArrayList<Node> deps = new ArrayList<>();
+            HashSet<Node> deps = new HashSet<>();
             deps.add(multFormula.expression());
 
             String sExpr = "(multiplicity-formula \'" + multFormula.multiplicity().toString() + " "
                          + multFormula.expression().accept(this) + ")";
-            String id = factory.withPrefix("mul-form$");
+            String id = factory.withPrefix("mul-f$");
             assignments.put(multFormula, new Assignment(id, sExpr, deps));
         }
 

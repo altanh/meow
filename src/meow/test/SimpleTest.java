@@ -8,6 +8,8 @@ import meow.engine.Assignment;
 
 import kodkod.ast.Variable;
 
+import java.util.HashSet;
+
 public class SimpleTest {
     public static void main(String[] args) {
         MeowVisitor mv = new MeowVisitor();
@@ -28,5 +30,12 @@ public class SimpleTest {
                 System.out.println("\trequires " + childId);
             }
         }
+
+        Assignment test = new Assignment("meme", "thing", new HashSet<Node>() {{
+            add(Expression.UNIV);
+            add(Expression.IDEN);
+        }});
+
+        assert(test.isLeaf());
     }
 }

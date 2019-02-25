@@ -1,13 +1,23 @@
 package meow.engine;
 
+import kodkod.ast.Expression;
 import kodkod.ast.Node;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public final class Assignment {
     public final String id;
     public final String sExpr;
-    public ArrayList<Node> deps;
+    public HashSet<Node> deps;
+
+    public static final HashMap<Node, Assignment> GLOBALS = new HashMap<>() {{
+        put(Expression.UNIV, new Assignment("univ", "", new HashSet<>()));
+        put(Expression.IDEN, new Assignment("iden", "", new HashSet<>()));
+        put(Expression.NONE, new Assignment("iden", "", new HashSet<>()));
+        put(Expression.INTS, new Assignment("ints", "", new HashSet<>()));
+    }};
 
     /**
      * Constructs a new assignment with the given parameters.
@@ -16,14 +26,14 @@ public final class Assignment {
      * @param deps the dependences of this assignment, i.e. other nodes that appear in sExpr
      * @implNote deps will be modified
      */
-    public Assignment(String id, String sExpr, ArrayList<Node> deps) {
+    public Assignment(String id, String sExpr, HashSet<Node> deps) {
         this.id = id;
         this.sExpr = sExpr;
         this.deps = deps;
     }
 
     public boolean isLeaf() {
-        return deps.size() == 0;
+        return deps.isEmpty() || deps.stream().allMatch(n -> GLOBALS.containsKey(n));
     }
 
     public boolean isGlobal() {

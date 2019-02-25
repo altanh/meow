@@ -55,7 +55,7 @@ public class Compiler {
 
             for (Node n : leaves) {
                 addDefinition(n);
-                removeDependency(n);
+                removeDependency(n, undefined);
                 undefined.remove(n);
             }
         }
@@ -68,8 +68,9 @@ public class Compiler {
         defs.add(def);
     }
 
-    private void removeDependency(Node n) {
-        for (Assignment as : visitor.getAssignments().values()) {
+    private void removeDependency(Node n, HashSet<Node> undefined) {
+        for (Node un : undefined) {
+            Assignment as = visitor.getAssignments().get(un);
             if (as.deps.contains(n)) {
                 as.deps.remove(n);
             }
