@@ -15,8 +15,8 @@ public final class Assignment {
     public static final HashMap<Node, Assignment> GLOBALS = new HashMap<>() {{
         put(Expression.UNIV, new Assignment("univ", "", new HashSet<>()));
         put(Expression.IDEN, new Assignment("iden", "", new HashSet<>()));
-        put(Expression.NONE, new Assignment("iden", "", new HashSet<>()));
-        put(Expression.INTS, new Assignment("ints", "", new HashSet<>()));
+        put(Expression.NONE, new Assignment("none", "", new HashSet<>()));
+        put(Expression.INTS, new Assignment("none", "", new HashSet<>()));
     }};
 
     /**

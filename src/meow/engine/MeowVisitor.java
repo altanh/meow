@@ -1,6 +1,7 @@
 package meow.engine;
 
 import kodkod.ast.*;
+import kodkod.ast.operator.FormulaOperator;
 import kodkod.ast.visitor.ReturnVisitor;
 
 import java.util.HashMap;
@@ -58,10 +59,8 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(decl.variable());
             deps.add(decl.expression());
 
-            String sExpr = "(cons ";
-            String varSExpr = decl.variable().accept(this);
-            String exprSExpr = decl.expression().accept(this);
-            sExpr += varSExpr + " " + exprSExpr + ")";
+            String sExpr = "(cons " + decl.variable().accept(this) + " "
+                         + decl.expression().accept(this) + ")";
 
             String id = factory.withPrefix("decl$");
             assignments.put(decl, new Assignment(id, sExpr, deps));
@@ -72,9 +71,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(Relation relation) {
         if (!assignments.containsKey(relation)) {
-            String id = factory.withPrefix("rel$");
             String sExpr = "(declare-relation " + relation.arity() + " \"" + relation.name() + "\")";
 
+            String id = factory.withPrefix("rel$");
             assignments.put(relation, new Assignment(id, sExpr, new HashSet<>()));
         }
 
@@ -84,9 +83,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
     public String visit(Variable variable) {
         if (!assignments.containsKey(variable)) {
             // Ocelot seems to only ever declare 'variables' of arity 1...
-            String id = factory.withPrefix("var$");
             String sExpr = "(declare-relation " + variable.arity() + " \"" + variable.name() + "\")";
 
+            String id = factory.withPrefix("var$");
             assignments.put(variable, new Assignment(id, sExpr, new HashSet<>()));
         }
 
@@ -95,7 +94,6 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(ConstantExpression constExpr) {
         if (!assignments.containsKey(constExpr)) {
-            // no support for INTS in Ocelot as far as I can tell
             throw new IllegalArgumentException("Illegal constant expression: " + constExpr.name());
         }
 
@@ -104,14 +102,12 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(UnaryExpression unaryExpr) {
         if (!assignments.containsKey(unaryExpr)) {
-            String childExpr = unaryExpr.expression().accept(this);
-            String op = unaryExpr.op().toString();
-            String sExpr = "(" + op + " " + childExpr + ")";
-            String id = factory.withPrefix("u-ex$");
-
             HashSet<Node> deps = new HashSet<>();
             deps.add(unaryExpr.expression());
 
+            String sExpr = "(" + unaryExpr.op().toString() + " " + unaryExpr.expression().accept(this) + ")";
+
+            String id = factory.withPrefix("u-ex$");
             assignments.put(unaryExpr, new Assignment(id, sExpr, deps));
         }
 
@@ -120,16 +116,14 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(BinaryExpression binExpr) {
         if (!assignments.containsKey(binExpr)) {
-            String leftExpr = binExpr.left().accept(this);
-            String rightExpr = binExpr.right().accept(this);
-            String op = binExpr.op().toString();
-            String sExpr = "(" + op + " " + leftExpr + " " + rightExpr + ")";
-            String id = factory.withPrefix("b-ex$");
-
             HashSet<Node> deps = new HashSet<>();
             deps.add(binExpr.left());
             deps.add(binExpr.right());
 
+            String sExpr = "(" + binExpr.op().toString() + " " + binExpr.left().accept(this) + " "
+                         + binExpr.right().accept(this) + ")";
+
+            String id = factory.withPrefix("b-ex$");
             assignments.put(binExpr, new Assignment(id, sExpr, deps));
         }
 
@@ -160,9 +154,8 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(comprehension.decls());
             deps.add(comprehension.formula());
 
-            String declsSExpr = comprehension.decls().accept(this);
-            String formulaSExpr = comprehension.formula().accept(this);
-            String sExpr = "(comprehension " + declsSExpr + " " + formulaSExpr + ")";
+            String sExpr = "(comprehension " + comprehension.decls().accept(this) + " "
+                         + comprehension.formula().accept(this) + ")";
 
             String id = factory.withPrefix("cmp$");
             assignments.put(comprehension, new Assignment(id, sExpr, deps));
@@ -172,7 +165,21 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
     }
 
     public String visit(IfExpression ifExpr) {
-        throw new UnsupportedOperationException();
+        if (!assignments.containsKey(ifExpr)) {
+            HashSet<Node> deps = new HashSet<>();
+            deps.add(ifExpr.condition());
+            deps.add(ifExpr.thenExpr());
+            deps.add(ifExpr.elseExpr());
+
+            String sExpr = "(ite " + ifExpr.condition().accept(this) + " "
+                         + ifExpr.thenExpr().accept(this) + " "
+                         + ifExpr.elseExpr().accept(this) + ")";
+
+            String id = factory.withPrefix("ite$");
+            assignments.put(ifExpr, new Assignment(id, sExpr, deps));
+        }
+
+        return assignments.get(ifExpr).id;
     }
 
     public String visit(ProjectExpression project) {
@@ -224,6 +231,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             String sExpr = "(quantified-formula \'" + quantFormula.quantifier().toString() + " "
                          + quantFormula.decls().accept(this) + " "
                          + quantFormula.formula().accept(this) + ")";
+
             String id = factory.withPrefix("q-f$");
             assignments.put(quantFormula, new Assignment(id, sExpr, deps));
         }
@@ -255,9 +263,13 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(formula.left());
             deps.add(formula.right());
 
-            String sExpr = "(" + formula.op().toString() + " "
-                         + formula.left().accept(this) + " "
-                         + formula.right().accept(this) + ")";
+            String leftSExpr = formula.left().accept(this);
+            String rightSExpr = formula.right().accept(this);
+            String op = formula.op().toString();
+
+            String sExpr = formula.op() == FormulaOperator.IFF ?
+                    "(&& (=> " + leftSExpr + " " + rightSExpr + ") " + "(=> " + rightSExpr + " " + leftSExpr + "))" :
+                    "(" + op + " " + leftSExpr + " " + rightSExpr + ")";
 
             String id = factory.withPrefix("b-f$");
             assignments.put(formula, new Assignment(id, sExpr, deps));
@@ -272,6 +284,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(formula.formula());
 
             String sExpr = "(! " + formula.formula().accept(this) + ")";
+
             String id = factory.withPrefix("!-f$");
             assignments.put(formula, new Assignment(id, sExpr, deps));
         }
@@ -293,6 +306,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             String sExpr = "(" + compFormula.op().toString() + " "
                          + compFormula.left().accept(this) + " "
                          + compFormula.right().accept(this) + ")";
+
             String id = factory.withPrefix("cmp-f$");
             assignments.put(compFormula, new Assignment(id, sExpr, deps));
         }
@@ -307,6 +321,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
             String sExpr = "(multiplicity-formula \'" + multFormula.multiplicity().toString() + " "
                          + multFormula.expression().accept(this) + ")";
+
             String id = factory.withPrefix("mul-f$");
             assignments.put(multFormula, new Assignment(id, sExpr, deps));
         }
