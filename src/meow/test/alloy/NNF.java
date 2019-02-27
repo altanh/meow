@@ -6,7 +6,8 @@ import java.util.List;
 import kodkod.ast.*;
 import kodkod.ast.operator.*;
 import kodkod.instance.*;
-import meow.engine.Compiler;
+import meow.Meow;
+import meow.engine.GraphCompiler;
 
 /* 
   ==================================================
@@ -718,11 +719,11 @@ public final class NNF {
         Formula x16 = Formula.compose(FormulaOperator.AND, x17, x19, x22, x25, x27, x33, x36, x39, x42, x70, x75, x80, x92, x104, x111, x351, x352, x353, x354, x355, x356, x357, x358, x359, x360, x361, x362, x363, x364, x365, x366);
 
         System.out.println("Compiling...");
-        Compiler c = new Compiler();
+        Meow meow = new Meow(x16, bounds);
         long time = System.currentTimeMillis();
-        c.compileGraph(x16);
+        meow.compile();
         time = System.currentTimeMillis() - time;
-        System.out.println(c.toString());
+        System.out.println(meow.toString());
         System.out.println("took " + time + "ms");
     }
 }

@@ -1,6 +1,7 @@
 package meow.engine;
 
 import kodkod.ast.*;
+import kodkod.ast.operator.ExprOperator;
 import kodkod.ast.operator.FormulaOperator;
 import kodkod.ast.visitor.ReturnVisitor;
 
@@ -120,7 +121,9 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(binExpr.left());
             deps.add(binExpr.right());
 
-            String sExpr = "(" + binExpr.op().toString() + " " + binExpr.left().accept(this) + " "
+            String op = binExpr.op() == ExprOperator.JOIN ? "join" : binExpr.op().toString();
+
+            String sExpr = "(" + op + " " + binExpr.left().accept(this) + " "
                          + binExpr.right().accept(this) + ")";
 
             String id = factory.withPrefix("b-ex$");
@@ -154,7 +157,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(comprehension.decls());
             deps.add(comprehension.formula());
 
-            String sExpr = "(comprehension " + comprehension.decls().accept(this) + " "
+            String sExpr = "(comprehension " + wrapDecl(comprehension.decls()) + " "
                          + comprehension.formula().accept(this) + ")";
 
             String id = factory.withPrefix("cmp$");
@@ -229,7 +232,7 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(quantFormula.formula());
 
             String sExpr = "(quantified-formula \'" + quantFormula.quantifier().toString() + " "
-                         + quantFormula.decls().accept(this) + " "
+                         + wrapDecl(quantFormula.decls()) + " "
                          + quantFormula.formula().accept(this) + ")";
 
             String id = factory.withPrefix("q-f$");
@@ -331,5 +334,15 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
 
     public String visit(RelationPredicate predicate) {
         throw new UnsupportedOperationException();
+    }
+
+    private String wrapDecl(Decls decls) {
+        String id = decls.accept(this);
+
+        if (decls instanceof Decl) {
+            return "(list " + id + ")";
+        } else {
+            return id;
+        }
     }
 }

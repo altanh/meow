@@ -2,9 +2,9 @@ package meow.test;
 
 import kodkod.ast.*;
 
-import meow.engine.Compiler;
+import meow.engine.GraphCompiler;
 
-public class CompilerTest {
+public class GraphCompilerTest {
     public static void main(String[] args) {
         Relation rel = Relation.unary("haha");
         Relation ral = Relation.unary("hoho");
@@ -14,10 +14,10 @@ public class CompilerTest {
         Formula fo = x.in(ral).or(y.in(rel));
         Expression myset = fo.comprehension(somexrel);
 
-        Compiler comp = new Compiler();
+        GraphCompiler comp = new GraphCompiler(myset);
 
         long time = System.currentTimeMillis();
-        comp.compileGraph(myset);
+        comp.compile();
         time = System.currentTimeMillis() - time;
 
         System.out.println("took " + time + "ms:");

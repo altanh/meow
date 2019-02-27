@@ -6,7 +6,8 @@ import java.util.List;
 import kodkod.ast.*;
 import kodkod.ast.operator.*;
 import kodkod.instance.*;
-import meow.engine.Compiler;
+import meow.Meow;
+import meow.engine.GraphCompiler;
 
 /*
   ==================================================
@@ -638,8 +639,8 @@ public final class Messaging {
         Formula x26 = Formula.compose(FormulaOperator.AND, x27, x34, x37, x42, x44, x51, x53, x60, x62, x82, x85, x93, x113, x116, x122, x125, x131, x134, x140, x143, x148, x150, x156, x159, x162, x166, x167, x170, x183, x264, x267, x268, x271, x272, x273, x274, x275, x276, x277, x278, x279, x280, x281, x282, x283, x284, x285, x286, x287, x288, x289, x290, x291, x292, x293, x294, x295, x296);
 
         System.out.println("Compiling...");
-        Compiler c = new Compiler();
-        c.compileGraph(x26);
-        System.out.println(c.toString());
+        Meow meow = new Meow(x26, bounds);
+        meow.compile();
+        System.out.println(meow.toString());
     }
 }

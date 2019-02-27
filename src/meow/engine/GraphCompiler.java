@@ -1,45 +1,46 @@
 package meow.engine;
 
 import kodkod.ast.Node;
+import kodkod.instance.Bounds;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Compiler {
+public class GraphCompiler {
     private MeowVisitor visitor;
-    private ArrayList<String> defs;
+    private ArrayList<String> relDefs;
     private Node root;
 
-    public Compiler() {
-        visitor = new MeowVisitor();
-        defs = new ArrayList<>();
-        root = null;
+    public GraphCompiler(Node root) {
+        this.visitor = new MeowVisitor();
+        this.relDefs = new ArrayList<>();
+        this.root = root;
     }
 
-    public void compileGraph(Node root) {
-        visitor = new MeowVisitor();
-        defs = new ArrayList<>();
-        this.root = root;
-
+    public void compile() {
         this.root.accept(visitor);
-        buildDefinitions();
+        buildRelations();
+    }
+
+    public HashMap<Node, Assignment> getAssignments() {
+        return visitor.getAssignments();
     }
 
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (String def : defs) {
+        for (String def : relDefs) {
             builder.append(def);
-            builder.append("\n");
         }
-
-        builder.append(visitor.getAssignments().get(root).id);
-        builder.append("\n");
 
         return builder.toString();
     }
 
-    private void buildDefinitions() {
+    public Assignment getRootAssignment() {
+        return visitor.getAssignments().get(root);
+    }
+
+    private void buildRelations() {
         HashMap<Node, Assignment> assignments = visitor.getAssignments();
         HashSet<Node> undefined = new HashSet<>();
         for (Map.Entry<Node, Assignment> entry : assignments.entrySet()) {
@@ -63,9 +64,9 @@ public class Compiler {
 
     private void addDefinition(Node n) {
         Assignment as = visitor.getAssignments().get(n);
-        String def = "(define " + as.id + " " + as.sExpr + ")";
+        String def = "(define " + as.id + " " + as.sExpr + ")\n";
 
-        defs.add(def);
+        relDefs.add(def);
     }
 
     private void removeDependency(Node n, HashSet<Node> undefined) {
