@@ -30,7 +30,7 @@ public class Meow {
 
         universe = "(define " + boundsCompiler.getUniverseAssignment().id + " "
                  + boundsCompiler.getUniverseAssignment().sExpr + ")\n";
-        interp = "(define interp (instantiate-bounds* " + boundsCompiler.getTotalBoundsAssignment().id + "))\n";
+        interp = "(define interp (instantiate-bounds " + boundsCompiler.getTotalBoundsAssignment().id + "))\n";
         satFormula = "(define F* (interpret* " + graphCompiler.getRootAssignment().id + " interp))\n";
         solverCall = "(define sol (solve (assert F*)))\n";
     }
@@ -38,6 +38,16 @@ public class Meow {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
+        String[] includes = {
+                "ocelot", "lang/ast", "engine/interpretation", "lang/bounds"
+        };
+
+        builder.append("#lang rosette\n");
+        builder.append("(require");
+        for (String include : includes) {
+            builder.append(" \"../../../" + include + ".rkt\"");
+        }
+        builder.append(")\n");
         builder.append(universe);
         builder.append(graphCompiler.toString());
         builder.append(boundsCompiler.toString());

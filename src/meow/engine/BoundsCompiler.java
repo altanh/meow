@@ -107,16 +107,32 @@ public class BoundsCompiler {
 
     private String visitTupleSet(TupleSet ts) {
         if (!tupleAssignments.containsKey(ts)) {
-            String sExpr = "(make-tupleset " + ts.arity() + " (list";
+            /*String sExpr = "(make-tupleset " + ts.arity() + " (list";
             for (Tuple t : ts) {
                 sExpr += " " + t.index();
             }
-            sExpr += "))";
+            sExpr += "))";*/
+            String sExpr = "(list";
+            for (Tuple t : ts) {
+                sExpr += " " + makeTuple(t);
+            }
+            sExpr += ")";
 
             String id = factory.withPrefix("ts$");
             tupleAssignments.put(ts, new Assignment(id, sExpr, new HashSet<>()));
         }
 
         return tupleAssignments.get(ts).id;
+    }
+
+    private String makeTuple(Tuple t) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(list");
+        for (Object atom : t.universe()) {
+            if (t.contains(atom))
+                builder.append(" \"" + atom.toString() + "\"");
+        }
+        builder.append(")");
+        return builder.toString();
     }
 }

@@ -12,7 +12,7 @@ public final class Assignment {
     public final String sExpr;
     public HashSet<Node> deps;
 
-    public static final HashMap<Node, Assignment> GLOBALS = new HashMap<>() {{
+    public static final HashMap<Node, Assignment> GLOBALS = new HashMap<Node, Assignment>() {{
         put(Expression.UNIV, new Assignment("univ", "", new HashSet<>()));
         put(Expression.IDEN, new Assignment("iden", "", new HashSet<>()));
         put(Expression.NONE, new Assignment("none", "", new HashSet<>()));
