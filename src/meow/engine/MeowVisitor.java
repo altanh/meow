@@ -3,6 +3,7 @@ package meow.engine;
 import kodkod.ast.*;
 import kodkod.ast.operator.ExprOperator;
 import kodkod.ast.operator.FormulaOperator;
+import kodkod.ast.operator.Multiplicity;
 import kodkod.ast.visitor.ReturnVisitor;
 
 import java.util.HashMap;
@@ -10,11 +11,13 @@ import java.util.HashSet;
 
 public class MeowVisitor implements ReturnVisitor<String, String, String, String> {
     private final HashMap<Node, Assignment> assignments;
+    private final RelationCompiler relCompiler;
     private final NameFactory factory;
 
-    public MeowVisitor() {
+    public MeowVisitor(RelationCompiler relCompiler) {
         this.assignments = new HashMap<>();
         this.factory = new NameFactory();
+        this.relCompiler = relCompiler;
 
         // Colocolo globals
         assignments.putAll(Assignment.GLOBALS);
@@ -60,8 +63,18 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(decl.variable());
             deps.add(decl.expression());
 
+            if (decl.multiplicity() != Multiplicity.ONE) {
+                System.err.println("Colocolo does not support decl multiplicity " + decl.multiplicity().name());
+                java.lang.System.exit(420);
+            }
+            if (decl.variable().arity() != 1) {
+                System.err.println("Colocolo does not support decl arity " + decl.variable().arity());
+                java.lang.System.exit(421);
+            }
+
             String sExpr = "(cons " + decl.variable().accept(this) + " "
-                         + decl.expression().accept(this) + ")";
+                         + decl.expression().accept(this) + " "
+                         + "#|" + decl.multiplicity().toString() + "|#)";
 
             String id = factory.withPrefix("decl$");
             assignments.put(decl, new Assignment(id, sExpr, deps));
@@ -71,26 +84,11 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
     }
 
     public String visit(Relation relation) {
-        if (!assignments.containsKey(relation)) {
-            String sExpr = "(declare-relation " + relation.arity() + " \"" + relation.name() + "\")";
-
-            String id = factory.withPrefix("rel$");
-            assignments.put(relation, new Assignment(id, sExpr, new HashSet<>()));
-        }
-
-        return assignments.get(relation).id;
+        return relCompiler.compile(relation);
     }
 
     public String visit(Variable variable) {
-        if (!assignments.containsKey(variable)) {
-            // Ocelot seems to only ever declare 'variables' of arity 1...
-            String sExpr = "(declare-relation " + variable.arity() + " \"" + variable.name() + "\")";
-
-            String id = factory.withPrefix("var$");
-            assignments.put(variable, new Assignment(id, sExpr, new HashSet<>()));
-        }
-
-        return assignments.get(variable).id;
+        return relCompiler.compile(variable);
     }
 
     public String visit(ConstantExpression constExpr) {
@@ -122,6 +120,11 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
             deps.add(binExpr.right());
 
             String op = binExpr.op() == ExprOperator.JOIN ? "join" : binExpr.op().toString();
+
+            if (binExpr.op() == ExprOperator.OVERRIDE) {
+                System.err.println("Colocolo does not support relational override (" + op + ")");
+                java.lang.System.exit(422);
+            }
 
             String sExpr = "(" + op + " " + binExpr.left().accept(this) + " "
                          + binExpr.right().accept(this) + ")";
@@ -296,8 +299,11 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
     }
 
     public String visit(ConstantFormula constant) {
-        // Ocelot doesn't have any?
-        throw new UnsupportedOperationException();
+        if (!assignments.containsKey(constant)) {
+            throw new IllegalArgumentException("expected true/false constant formula, got " + constant);
+        }
+
+        return assignments.get(constant).id;
     }
 
     public String visit(ComparisonFormula compFormula) {
@@ -333,7 +339,17 @@ public class MeowVisitor implements ReturnVisitor<String, String, String, String
     }
 
     public String visit(RelationPredicate predicate) {
-        throw new UnsupportedOperationException();
+        if (!assignments.containsKey(predicate)) {
+            Formula cons = predicate.toConstraints();
+
+            HashSet<Node> deps = new HashSet<>();
+            deps.add(cons);
+
+            String sExpr = cons.accept(this);
+            String id = factory.withPrefix("app$");
+            assignments.put(predicate, new Assignment(id, sExpr, deps));
+        }
+        return assignments.get(predicate).id;
     }
 
     private String wrapDecl(Decls decls) {

@@ -12,7 +12,7 @@ import java.util.*;
 public class BoundsCompiler {
     private final NameFactory factory;
     private final Bounds bounds;
-    private final HashMap<Node, Assignment> graphAssignments; // need for relation ids
+    private final RelationCompiler relCompiler;
     private final HashMap<TupleSet, Assignment> tupleAssignments;
     private final HashMap<Relation, Assignment> boundAssignments;
 
@@ -21,10 +21,10 @@ public class BoundsCompiler {
     private ArrayList<String> boundDefs;
     private Assignment totalBoundsAssignment;
 
-    public BoundsCompiler(Bounds bounds, HashMap<Node, Assignment> graphAssignments) {
+    public BoundsCompiler(Bounds bounds, RelationCompiler rc) {
         this.bounds = bounds;
         this.factory = new NameFactory();
-        this.graphAssignments = graphAssignments;
+        this.relCompiler = rc;
         this.tupleAssignments = new HashMap<>();
         this.boundAssignments = new HashMap<>();
 
@@ -93,10 +93,7 @@ public class BoundsCompiler {
         Map<Relation, TupleSet> uppers = bounds.upperBounds();
 
         for (Relation rel : bounds.relations()) {
-            if (!graphAssignments.containsKey(rel))
-                throw new IllegalStateException("uncompiled relation " + rel);
-
-            String sExpr = "(bound " + graphAssignments.get(rel).id + " "
+            String sExpr = "(bound " + relCompiler.compile(rel) + " "
                          + visitTupleSet(lowers.get(rel)) + " "
                          + visitTupleSet(uppers.get(rel)) + ")";
 
@@ -128,9 +125,8 @@ public class BoundsCompiler {
     private String makeTuple(Tuple t) {
         StringBuilder builder = new StringBuilder();
         builder.append("(list");
-        for (Object atom : t.universe()) {
-            if (t.contains(atom))
-                builder.append(" \"" + atom.toString() + "\"");
+        for (int i = 0; i < t.arity(); ++i) {
+            builder.append(" \"" + t.atom(i).toString() + "\"");
         }
         builder.append(")");
         return builder.toString();

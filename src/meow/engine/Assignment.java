@@ -1,6 +1,7 @@
 package meow.engine;
 
 import kodkod.ast.Expression;
+import kodkod.ast.Formula;
 import kodkod.ast.Node;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public final class Assignment {
         put(Expression.IDEN, new Assignment("iden", "", new HashSet<>()));
         put(Expression.NONE, new Assignment("none", "", new HashSet<>()));
         put(Expression.INTS, new Assignment("none", "", new HashSet<>()));
+        put(Formula.TRUE, new Assignment("true", "", new HashSet<>()));
+        put(Formula.FALSE, new Assignment("false", "", new HashSet<>()));
     }};
 
     /**
