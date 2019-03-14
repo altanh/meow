@@ -1,4 +1,4 @@
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,13 +7,11 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
+import meow.Meow;
 
 /**
  * The  GEO158+1 problem from http://www.cs.miami.edu/~tptp/
@@ -381,41 +379,14 @@ public class GEO158 {
 		
 		try {
 			final int n = Integer.parseInt(args[0]);
-				
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-	
+			if (n < 1)
+				usage();
 			final GEO158 model = new GEO158();
 			final Formula f = model.checkConsistent();
-			
-			
-//			System.out.println(model.decls());
-//			System.out.println(model.partOfDefn());
-//			System.out.println(model.sumDefn());
-//			
-//			System.out.println(model.endPointDefn());
-//			System.out.println(model.innerPointDefn());
-//			System.out.println(model.meetDefn());
-//			
-//			System.out.println(model.openDefn());
-//			System.out.println(model.closedDefn());			
-//			System.out.println(model.c1());
-//			
-//			System.out.println(model.c2());
-//			System.out.println(model.c3());
-//			System.out.println(model.c4());
-//			
-//			System.out.println(model.c6());
-//			System.out.println(model.c7());
-//			System.out.println(model.c8());
-//			
-//			System.out.println(model.c9());
-
-			
-			
 			final Bounds b = model.bounds(n);
-			final Solution sol = solver.solve(f,b);
-			System.out.println(sol);
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/GEO158-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Expression.UNIV;
 
@@ -13,9 +13,6 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.TupleSet;
@@ -185,7 +182,7 @@ public final class NUM378 {
 			final Bounds b = model.bounds();
 			final Meow meow = new Meow(f, b);
 			meow.compile();
-			meow.writeSuite("/Users/altan/git/colocolo/bench/tptp/NUM378");
+			meow.writeSuite("bench/tptp/NUM378");
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

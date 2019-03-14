@@ -1,15 +1,12 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Formula.*;
 import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.Tuple;
 import kodkod.instance.TupleFactory;
@@ -154,7 +151,7 @@ public final class ALG195 extends Quasigroups7 {
 			final Bounds b = model.bounds();
 			final Meow meow = new Meow(f, b);
 			meow.compile();
-			meow.writeSuite("/Users/altan/git/colocolo/bench/tptp/ALG195");
+			meow.writeSuite("bench/tptp/ALG195");
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

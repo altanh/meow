@@ -1,15 +1,13 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
+import meow.Meow;
 
 /**
  * KK encoding of GEO115+1.p from http://www.cs.miami.edu/~tptp/
@@ -66,19 +64,15 @@ public final class GEO115 extends GEO159 {
 		
 		try {
 			final int n = Integer.parseInt(args[0]);
-		
-	
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-	
+			if (n < 1)
+				usage();
 			final GEO115 model = new GEO115();
 			final Formula f = model.theorem385();
-			
 			final Bounds b = model.bounds(n);
-			final Solution sol = solver.solve(f,b);
-			
-			System.out.println(sol);
-			
+
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/GEO115-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

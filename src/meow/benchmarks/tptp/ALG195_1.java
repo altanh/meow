@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,9 +11,6 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.Instance;
 import kodkod.instance.Tuple;
@@ -377,7 +374,7 @@ public final class ALG195_1 {
 			final Bounds b = model.bounds();
 			final Meow meow = new Meow(f, b);
 			meow.compile();
-			meow.writeSuite("/Users/altan/git/colocolo/bench/tptp/ALG195_1");
+			meow.writeSuite("bench/tptp/ALG195_1");
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

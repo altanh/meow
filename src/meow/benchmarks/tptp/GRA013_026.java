@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,17 +11,13 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.config.ConsoleReporter;
 import kodkod.engine.fol2sat.HigherOrderDeclException;
 import kodkod.engine.fol2sat.UnboundLeafException;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
-import kodkod.util.nodes.PrettyPrinter;
+import meow.Meow;
 
 /**
  * A KK encoding of GRA019+1.p through GRA026+1.p from http://www.cs.miami.edu/~tptp/
@@ -171,21 +167,14 @@ public final class GRA013_026 {
 		if (args.length < 2)
 			usage();
 		try {
-
-			final GRA013_026 model = new GRA013_026(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-			
+			final int graphSize = Integer.parseInt(args[0]);
+			final int cliqueSize = Integer.parseInt(args[1]);
+			final GRA013_026 model = new GRA013_026(graphSize, cliqueSize);
 			final Bounds b = model.bounds();
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-			solver.options().setReporter(new ConsoleReporter());
-			
 			final Formula f = model.checkGoalToBeProved();
-			System.out.println(PrettyPrinter.print(f, 2));
-//			System.out.println(b);
-			final Solution s = solver.solve(f, b);
-			System.out.println(s);
-			//System.out.println((new Evaluator(s.instance())).evaluate(f));
-	
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/GRA013_026-" + graphSize + "-" + cliqueSize);
 		} catch (HigherOrderDeclException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

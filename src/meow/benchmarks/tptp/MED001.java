@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Expression.IDEN;
 import static kodkod.ast.Expression.UNIV;

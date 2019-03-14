@@ -1,15 +1,13 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
+import meow.Meow;
 
 /**
  * The  GEO092+1 problem from http://www.cs.miami.edu/~tptp/
@@ -72,25 +70,19 @@ public class GEO092 extends GEO158 {
 	 * Usage: ava examples.tptp.GEO192 [# curves] [# points]
 	 */
 	public static void main(String[] args) {
-		if (args.length < 2)
+		if (args.length < 1)
 			usage();
 		
 		try {
 			final int n = Integer.parseInt(args[0]);
-		
-	
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
+			if (n < 1)
+				usage();
 			final GEO092 model = new GEO092();
 			final Formula f = model.checkProposition2141();
-			
-			System.out.println(model.proposition2141());
-			
 			final Bounds b = model.bounds(n);
-			final Solution sol = solver.solve(f,b);
-			
-			System.out.println(sol);
-			//System.out.println((new Evaluator(sol.instance())).evaluate(model.axioms().and(model.theorem213().not())));
+			final Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/GEO192-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

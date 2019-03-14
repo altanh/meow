@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,6 @@ import java.util.List;
 import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.Tuple;
 import kodkod.instance.TupleFactory;
@@ -145,14 +142,13 @@ public final class ALG197 extends Quasigroups7 {
 	 * Usage: java examples.tptp.ALG197
 	 */
 	public static void main(String[] args) {
-	
 		try {
 			final ALG197 model = new ALG197();
 			final Formula f = model.checkCO1();
 			final Bounds b = model.bounds();
 			final Meow meow = new Meow(f, b);
 			meow.compile();
-			meow.writeSuite("/Users/altan/git/colocolo/bench/tptp/ALG197");
+			meow.writeSuite("bench/tptp/ALG197");
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

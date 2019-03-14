@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Expression.UNIV;
 
@@ -12,13 +12,11 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
+import meow.Meow;
 
 /**
  * A KK encoding of NUM374+1.p from http://www.cs.miami.edu/~tptp/
@@ -308,14 +306,11 @@ public final class NUM374 {
 			if (n < 1)
 				usage();
 			final NUM374 model = new NUM374();
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-			solver.options().setSymmetryBreaking(n*n);
 			final Formula f = model.checkWilkie();
 			final Bounds b = model.bounds(n);
-			System.out.println(f);
-			final Solution sol = solver.solve(f, b);
-			System.out.println(sol);
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/NUM374-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

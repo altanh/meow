@@ -1,15 +1,13 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Expression.UNIV;
 import kodkod.ast.Formula;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
+import meow.Meow;
 
 /**
  * A KK encoding of MED009+1.p from http://www.cs.miami.edu/~tptp/
@@ -59,15 +57,11 @@ public final class MED009 extends MED001 {
 			if (n < 1)
 				usage();
 			final MED009 model = new MED009();
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-//			solver.options().setSymmetryBreaking(1000);
-//			solver.options().setFlatten(false);
 			final Formula f = model.checkTranssls2_qige27();
 			final Bounds b = model.bounds(n);
-			System.out.println(f);
-			final Solution sol = solver.solve(f, b);
-			System.out.println(sol);
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/MED009-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

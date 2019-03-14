@@ -1,4 +1,4 @@
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,12 +7,10 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.Universe;
+import meow.Meow;
 
 /**
  * A KK encoding of MGT066+1.p from http://www.cs.miami.edu/~tptp/
@@ -127,14 +125,11 @@ public final class MGT066 {
 			if (n < 1)
 				usage();
 			final MGT066 model = new MGT066();
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-			solver.options().setSymmetryBreaking(n*n);
 			final Formula f = model.axioms();
 			final Bounds b = model.bounds(n);
-			System.out.println(f);
-			final Solution sol = solver.solve(f, b);
-			System.out.println(sol);
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/MGT066-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

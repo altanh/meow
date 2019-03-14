@@ -1,11 +1,9 @@
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import kodkod.ast.Formula;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
+import meow.Meow;
 
 /**
  * The  GEO091+1 problem from http://www.cs.miami.edu/~tptp/
@@ -60,19 +58,14 @@ public class GEO091 extends GEO158 {
 		
 		try {
 			final int n = Integer.parseInt(args[0]);
-	
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
+			if (n < 1)
+				usage();
 			final GEO091 model = new GEO091();
 			final Formula f = model.checkTheorem_2_13();
-			
-			System.out.println(model.theorem_2_13());
-			
 			final Bounds b = model.bounds(n);
-			final Solution sol = solver.solve(f,b);
-			
-			System.out.println(sol);
-			//System.out.println((new Evaluator(sol.instance())).evaluate(model.axioms().and(model.theorem213().not())));
+			final Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/GEO191-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

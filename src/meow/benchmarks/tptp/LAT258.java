@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Expression.UNIV;
 
@@ -12,15 +12,13 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
 import kodkod.engine.fol2sat.HigherOrderDeclException;
 import kodkod.engine.fol2sat.UnboundLeafException;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
+import meow.Meow;
 
 /**
  * A KK encoding of LAT258+1.p from http://www.cs.miami.edu/~tptp/
@@ -337,21 +335,15 @@ public final class LAT258 {
 		if (args.length < 1)
 			usage();
 		try {
-
 			final int n = Integer.parseInt(args[0]);
+			if (n < 1)
+				usage();
 			final LAT258 model = new LAT258();
-			
 			final Bounds b = model.bounds(n);
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-			
 			final Formula f = model.checkGoalToBeProved();
-			System.out.println(f);
-//			System.out.println(b);
-			final Solution s = solver.solve(f, b);
-			System.out.println(s);
-		
-	
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/LAT258-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		} catch (HigherOrderDeclException e) {

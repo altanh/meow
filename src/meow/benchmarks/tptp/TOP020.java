@@ -1,7 +1,7 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import static kodkod.ast.Expression.IDEN;
 import static kodkod.ast.Expression.UNIV;
@@ -13,9 +13,6 @@ import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleFactory;
 import kodkod.instance.Universe;
@@ -309,13 +306,19 @@ public final class TOP020 {
 	 * Usage: java examples.tptp.TOP020 [univ size]
 	 */
 	public static void main(String[] args) {
+		if (args.length < 1)
+			usage();
+
 		try {
+			final int n = Integer.parseInt(args[0]);
+			if (n < 1)
+				usage();
 			final TOP020 model = new TOP020();
 			final Formula f = model.checkChallenge_AMR_1_4_4();
-			final Bounds b = model.bounds(5);
+			final Bounds b = model.bounds(n);
 			final Meow meow = new Meow(f, b);
 			meow.compile();
-			meow.writeSuite("/Users/altan/git/colocolo/bench/tptp/TOP020");
+			meow.writeSuite("bench/tptp/TOP020-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

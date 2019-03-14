@@ -1,17 +1,15 @@
 /**
  * 
  */
-package meow.test.tptp;
+package meow.benchmarks.tptp;
 
 import kodkod.ast.Expression;
 import kodkod.ast.Formula;
 import kodkod.ast.Relation;
 import kodkod.ast.Variable;
-import kodkod.engine.Solution;
-import kodkod.engine.Solver;
-import kodkod.engine.satlab.SATFactory;
 import kodkod.instance.Bounds;
 import kodkod.instance.TupleSet;
+import meow.Meow;
 
 /**
  * The  GEO159+1 problem from http://www.cs.miami.edu/~tptp/
@@ -90,16 +88,14 @@ public class GEO159 extends GEO158 {
 		
 		try {
 			final int n = Integer.parseInt(args[0]);
-
-			final Solver solver = new Solver();
-			solver.options().setSolver(SATFactory.MiniSat);
-	
+			if (n < 1)
+				usage();
 			final GEO159 model = new GEO159();
 			final Formula f = model.checkDefs();
-			
 			final Bounds b = model.bounds(n);
-			final Solution sol = solver.solve(f,b);
-			System.out.println(sol);
+			Meow meow = new Meow(f, b);
+			meow.compile();
+			meow.writeSuite("bench/tptp/GEO159-" + n);
 		} catch (NumberFormatException nfe) {
 			usage();
 		}

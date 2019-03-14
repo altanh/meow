@@ -85,14 +85,14 @@ public class Meow {
         StringBuilder builder = new StringBuilder();
 
         String[] includes = {
-                "ocelot", "lang/ast", "engine/interpretation", "lang/bounds", "engine/sat/solver",
-                "lib/skolemize-solve", "engine/symmetry"
+                "", "/lang/ast", "/engine/interpretation", "/lang/bounds", "/engine/sat/solver",
+                "/lib/skolemize-solve", "/engine/symmetry"
         };
 
         builder.append("#lang rosette\n");
         builder.append("(require");
         for (String include : includes) {
-            builder.append(" \"../../" + include + ".rkt\"");
+            builder.append(" colocolo" + include);
         }
         builder.append(")\n");;
         builder.append(universe);
