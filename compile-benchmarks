@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Compiling benchmarks..."
+java -cp bin/kodkod.jar:bin/meow.jar:bin/benchmarks.jar -Djava.library.path=bin meow.benchmarks.CompileBenchmarks
